@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Londra · Dolce Vita</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,500&family=Jost:wght@400;500&display=swap">
+<style>
+:root{--crema:#f7f0e3;--carta:#fffaf0;--moka:#3b2a20;--terra:#b94e2e;--salvia:#5d6b45;--sole:#e9b44c;--linea:#e3d6bd}
+*{box-sizing:border-box}
+body{margin:0;background:var(--crema);color:var(--moka);font:17px/1.55 Jost,system-ui,sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+header{text-align:center;padding:42px 20px 22px;background:linear-gradient(var(--sole),#f0c978);border-bottom:6px double var(--terra)}
+header small{letter-spacing:.3em;text-transform:uppercase;font-size:12px}
+h1,h2{font-family:"Playfair Display",Georgia,serif;font-weight:600}
+h1{font-size:46px;margin:6px 0;font-style:italic;color:var(--terra)}
+header p{margin:0;font-style:italic}
+nav{position:sticky;top:0;z-index:5;display:flex;gap:8px;overflow-x:auto;padding:10px 14px;background:var(--crema);border-bottom:1px solid var(--linea)}
+nav a{flex:none;padding:6px 14px;border-radius:99px;border:1px solid var(--terra);color:var(--terra);text-decoration:none;font-size:15px}
+main{max-width:720px;margin:auto;padding:16px}
+section{background:var(--carta);border:1px solid var(--linea);border-radius:18px;padding:20px;margin:18px 0;box-shadow:0 4px 14px #3b2a2014;scroll-margin-top:60px}
+h2{margin:0;font-size:27px;color:var(--terra)}
+.sub{margin:2px 0 14px;color:var(--salvia);font-style:italic}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.btn{display:inline-block;padding:11px 16px;border-radius:12px;background:var(--terra);color:#fff;text-decoration:none;font-weight:500}
+.btn.alt{background:var(--salvia)}
+.btn.ghost{background:none;color:var(--terra);border:1px solid var(--terra)}
+ol{padding-left:0;list-style:none;counter-reset:s}
+ol li{counter-increment:s;position:relative;padding:0 0 12px 38px}
+ol li::before{content:counter(s);position:absolute;left:0;top:1px;width:26px;height:26px;border-radius:50%;background:var(--sole);text-align:center;font-weight:500;font-size:14px;line-height:26px}
+li a{color:var(--moka);font-weight:500;text-decoration-color:var(--terra)}
+.pren{background:#fbe8b8;border-left:4px solid var(--terra);padding:9px 12px;border-radius:8px;margin:8px 0;font-weight:500}
+.nota{font-size:15px;color:#6b5646;margin:6px 0}
+.cons{background:#e9eddc;border-radius:10px;padding:10px 12px;font-size:15px;margin-top:10px}
+button.stop{font:inherit;font-weight:500;color:var(--moka);background:none;border:0;border-bottom:2px solid var(--terra);padding:0 0 1px;cursor:pointer;text-align:left}
+.extra{background:#fdf0d5;border-radius:10px;padding:10px 12px;font-size:15px;margin-top:10px}.extra ul{margin:6px 0 0;padding-left:18px}.extra li{padding:0 0 4px}
+footer{text-align:center;padding:24px;font-style:italic;color:var(--salvia)}
+</style>
+</head>
+<body>
+<header><small>Weekend a</small><h1>Londra</h1><p>Venerdì sera → martedì mattina · piano piano, con calma, a piedi</p></header>
+<nav id="nav"></nav>
+<main id="giorni"></main>
+<footer>Buon viaggio · La dolce vita, ma a Londra</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const L=", London";
+const q=s=>"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(s+L);
+const dir=(d,m)=>{const p=new URLSearchParams({api:"1",origin:d.o+L,destination:d.d+L,travelmode:m});
+ if(m==="walking"&&d.w.length)p.set("waypoints",d.w.map(x=>x+L).join("|"));
+ return "https://www.google.com/maps/dir/?"+p};
+const D=[
+{id:"ven",t:"Venerdì sera",s:"Da Earls Court alla Royal Albert Hall",o:"Mercure London Earls Court",w:["West Brompton Station","South Kensington Station","Exhibition Road"],d:"Albert Memorial",
+ pren:["Prenotato: The Duchess of Kensington, ore 20:30","The Duchess of Kensington"],
+ st:[["West Brompton","Londra residenziale: case vittoriane, pub, strade alberate. Un tempo campi e vivai."],["Old Brompton Road","Strada storica verso South Kensington: guardare facciate e vie laterali."],["South Kensington Station","Cuore di “Albertopolis”, nata dopo la Great Exhibition del 1851."],["Exhibition Road","V&A, Natural History Museum, Science Museum, Imperial College."],["Royal Albert Hall","Inaugurata nel 1871: cupola e mosaico esterno, bellissima illuminata."],["Albert Memorial","Dedicato al principe Albert (1861): il filo di tutta la passeggiata."]],
+ n:[],c:"A piedi è il migliore: è la passeggiata stessa il motivo. Se piove, metro District/Circle da Earls Court a South Kensington."},
+{id:"sam",t:"Sabato mattina",s:"Duemila anni di Londra, da London Bridge a Borough Market",o:"London Bridge",w:["Tower of London","Leadenhall Market","St Dunstan in the East","Barbican Conservatory","St Paul’s Cathedral","Millennium Bridge"],d:"Borough Market",
+ st:[["London Bridge","Un ponte qui da quasi 2.000 anni. Verso est si vede Tower Bridge."],["Tower of London","Dal 1070 circa: White Tower, Crown Jewels, corvi."],["Leadenhall Market","Ferro e vetro vittoriani tra i grattacieli. Ingresso di Diagon Alley."],["St Dunstan in the East","Rovine della chiesa trasformate in giardino."],["Barbican Conservatory","Brutalismo e serra tropicale con circa 1.500 specie."],["St Paul’s Cathedral","Cupola di Wren dopo il Great Fire del 1666."],["Millennium Bridge","Guardare indietro: St Paul’s incorniciata. Davanti, Tate Modern."],["Borough Market","Giro tra bancarelle, poi pranzo da condividere. SI MANGIA QUI!"]],
+ n:["Controllare i biglietti del Barbican","St Paul’s: 27£ se vogliamo visitare"],c:"A piedi, tutto di fila. Un tratto lungo e in salita è tra Leadenhall e il Barbican: se si è stanchi, metro da Bank/Moorgate."},
+{id:"sap",t:"Sabato pomeriggio",s:"Parchi reali, scienza e Notting Hill",o:"Speakers’ Corner Hyde Park",w:["Princess Diana Memorial Fountain","Kensington Palace","Albert Memorial","Natural History Museum"],d:"Portobello Road Market",
+ pren:["Ore 19:45 Dishoom Permit Room","Dishoom Permit Room Notting Hill"],
+ st:[["Hyde Park · Speakers’ Corner","Dove da secoli si parla in pubblico. Poi il Serpentine."],["Princess Diana Memorial Fountain","Fontana circolare con acqua che scorre."],["Kensington Gardens e Palace","Giardini ex privati, palazzo legato a Diana."],["Albert Memorial","Monumento dorato voluto da Victoria."],["Natural History Museum","Entrare almeno nell’atrio: la balena azzurra nella Hintze Hall."],["Notting Hill","Case colorate e storia caraibica, origine del Carnival."],["Portobello Road","Mercato di antiquariato, vintage e collezioni."]],
+ n:["Da valutare quanto stare nel museo"],c:"A piedi nei parchi; il salto dal museo a Notting Hill conviene farlo in metro (da South Kensington a Notting Hill Gate), poi di nuovo a piedi."},
+{id:"dom",t:"Domenica mattina",s:"East London: fiori, street art e brunch",o:"Columbia Road Flower Market",w:["Redchurch Street","Sclater Street","Brick Lane","Old Spitalfields Market"],d:"Boundary Shoreditch",
+ pren:["Brunch al Boundary Brasserie, ore 12:30","Boundary Shoreditch"],
+ st:[["Columbia Road Flower Market","Fiori, piante e venditori che urlano le offerte."],["Shoreditch","Street art: guardare i muri e le vie laterali."],["Redchurch Street","Boutique indipendenti e concept store."],["Sclater Street","Graffiti, murales e vecchi edifici industriali."],["Brick Lane","Storia bengalese, vintage, street food: solo uno snack!"],["Old Spitalfields Market","Mercato coperto con design e artigianato."],["Boundary Brasserie","Brunch alle 12:30."]],
+ n:["Se troviamo colazione in questa zona, non sarebbe male"],c:"Tutto a piedi: le distanze sono corte e il bello è in strada."},
+{id:"dop",t:"Domenica pomeriggio",s:"Hackney tra parchi, canali e cena georgiana",o:"Victoria Park Pavilion Cafe",w:["Broadway Market","London Fields","Hackney City Farm"],d:"Hackney Wick Station",
+ pren:["Cena: Qarva Restaurant (georgiano), ore 20:00","Qarva Restaurant"],
+ st:[["Victoria Park","Parco vittoriano del 1845, domenica da londinesi."],["Broadway Market","Street food, pane, fiori, librerie."],["London Fields","Prati da picnic accanto al mercato."],["Hackney City Farm","Fattoria urbana: la domenica chiude alle 16:30!"],["Hackney Wick","Magazzini riconvertiti, street art e River Lea."]],
+ n:[],c:"A piedi. Visitare la fattoria prima di fermarsi a lungo al mercato (chiude alle 16:30)."},
+{id:"lun",t:"Lunedì mattina",s:"Londra istituzionale e reale",o:"Westminster Abbey",w:["Big Ben","Westminster Bridge","Downing Street","Horse Guards Parade","St James’s Park"],d:"Buckingham Palace",
+ st:[["Westminster Abbey","Gotica, incoronazioni dal 1066. Parliament Square."],["Big Ben","Palace of Westminster, poi Westminster Bridge per la vista."],["Whitehall e Downing Street","Il viale delle istituzioni."],["Horse Guards Parade","Cerimonie della Guardia a cavallo."],["St James’s Park","Lago e ponticelli."],["Buckingham Palace","Victoria Memorial, poi The Mall verso Trafalgar Square."]],
+ n:["Pranzo: Chinatown (Bunhouse, walk in)","Dopo: Albert Adrià, Cakes & Bubbles","Cercare cena a Hackney Wick"],c:"A piedi: è un percorso compatto e piatto."},
+{id:"mar",t:"Martedì mattina",s:"Marylebone, un’ultima Londra elegante",o:"Marylebone High Street",w:["Chiltern Street","Daunt Books Marylebone"],d:"Regent’s Park",
+ st:[["Marylebone High Street","Boutique indipendenti, caffè, edifici georgiani."],["Chiltern Street","Una delle chicche meno turistiche."],["Daunt Books","Libreria edoardiana con galleria in legno."],["Colazione o brunch","Ultima pausa londinese senza fretta."],["Regent’s Park","Se c’è tempo prima di recuperare i bagagli."]],
+ n:[],c:"A piedi, con calma."}
+];
+const I={
+"West Brompton":["Brompton era un piccolo insediamento di campi, orti e vivai che rifornivano Londra. L’espansione ottocentesca lo inglobò nella città, lasciando le case vittoriane in mattoni.","Qui si trova il Brompton Cemetery, uno dei grandi cimiteri vittoriani di Londra, dove è sepolta Emmeline Pankhurst."],
+"Old Brompton Road":["Antica strada che collega Earls Court a South Kensington. Nell’Ottocento si riempì di terrazze vittoriane e piccoli negozi.","Il nome Brompton deriva probabilmente da “fattoria delle ginestre”. Le vie laterali sono le più belle da osservare."],
+"South Kensington Station":["La stazione è del 1868. Il quartiere nacque con gli utili della Great Exhibition del 1851, voluta dal principe Albert: da qui il soprannome “Albertopolis”.","Un lungo tunnel pedonale porta direttamente ai musei, evitando la strada."],
+"Exhibition Road":["La strada attraversa l’area comprata con i profitti della Great Exhibition. Oggi riunisce V&A, Natural History Museum, Science Museum e Imperial College.","Dal 2012 è una “shared space”: pedoni e auto condividono la carreggiata, senza marciapiedi tradizionali."],
+"Royal Albert Hall":["Inaugurata nel 1871 dalla regina Victoria, ispirata agli anfiteatri antichi. La grande cupola e il fregio a mosaico celebrano arti e scienze.","Dal 1941 ospita i Proms, il grande festival estivo di musica classica."],
+"Albert Memorial":["Inaugurato nel 1872, disegnato da George Gilbert Scott, in memoria del principe Albert morto nel 1861. Victoria lo volle volutamente monumentale.","La statua dorata di Albert tiene in mano il catalogo della Great Exhibition del 1851."],
+"London Bridge":["Un ponte esiste qui dall’epoca romana. Quello medievale in pietra, del 1209, durò per oltre sei secoli, con case e negozi costruiti sopra.","L’attuale ponte è del 1973. Il precedente fu venduto e rimontato a Lake Havasu City, in Arizona."],
+"Tower of London":["Iniziata da Guglielmo il Conquistatore dopo il 1066, con la White Tower al centro. Fu palazzo, fortezza, prigione, arsenale e zecca.","Vi abitano ancora i Beefeater. Secondo la leggenda, se i corvi lasciassero la Torre il regno cadrebbe."],
+"Leadenhall Market":["Sorge dove un tempo c’era il foro romano. La struttura in ferro e vetro è del 1881, opera di Horace Jones.","Nel primo film di Harry Potter è l’ingresso del Paiolo Magico a Diagon Alley."],
+"St Dunstan in the East":["Chiesa medievale danneggiata dal Great Fire del 1666, restaurata con la torre di Wren e poi colpita dai bombardamenti del 1941. Dal 1971 è un giardino pubblico.","La torre con guglia di Wren è ancora in piedi, avvolta dall’edera."],
+"Barbican Conservatory":["Il Barbican fu costruito su un’area devastata dal Blitz, come “città nella città”. È uno dei massimi esempi di brutalismo londinese.","La serra nasconde oltre 1.500 specie di piante. Apre solo in certi giorni: controlla gli orari e i biglietti."],
+"St Paul’s Cathedral":["La cattedrale attuale è di Christopher Wren, costruita dopo il Great Fire, tra il 1675 e il 1710. Qui sorgevano chiese fin dal VII secolo.","Nella Whispering Gallery un sussurro si sente dal lato opposto. Qui si sposarono Carlo e Diana nel 1981."],
+"Millennium Bridge":["Passerella pedonale aperta nel 2000, collega St Paul’s alla Tate Modern. Fu chiusa dopo due giorni per le oscillazioni e riaperta nel 2002.","Detto “Wobbly Bridge”, compare in Harry Potter e il Principe Mezzosangue."],
+"Borough Market":["Uno dei mercati alimentari più antichi di Londra, con radici medievali. Il sito attuale è occupato dal 1756.","Compare nel Diario di Bridget Jones. Giusto girare tutto prima di scegliere cosa mangiare."],
+"Hyde Park · Speakers’ Corner":["Terre di Westminster Abbey, trasformate da Enrico VIII in riserva di caccia. Lo Speaker’s Corner, vicino a Marble Arch, dal 1872 è il luogo del discorso libero.","Si dice che vi abbiano parlato o ascoltato figure come Karl Marx e George Orwell."],
+"Princess Diana Memorial Fountain":["Inaugurata nel 2004, è un anello di granito, progettato da Kathryn Gustafson.","È fatta con 545 pezzi di granito della Cornovaglia. L’acqua scorre da due lati e si ricongiunge in basso."],
+"Kensington Gardens e Palace":["Erano i giardini privati di Kensington Palace, residenza reale dal 1689. Furono separati da Hyde Park nel Settecento.","La regina Victoria nacque qui nel 1819. Nei giardini c’è la statua di Peter Pan, del 1912."],
+"Natural History Museum":["Aperto nel 1881, edificio romanico in terracotta di Alfred Waterhouse. Nato dalle collezioni di Richard Owen.","La balena azzurra “Hope” (oltre 25 m) ha sostituito il diplodoco Dippy nel 2017. Ingresso gratuito."],
+"Notting Hill":["Zona agricola fino all’Ottocento, poi urbanizzata. Nel dopoguerra vi si stabilì una forte comunità caraibica.","Il Notting Hill Carnival, nato alla fine degli anni Cinquanta, è tra i più grandi d’Europa. Il film del 1999 ha reso famose queste strade."],
+"Portobello Road":["Nata come strada di campagna, il suo nome ricorda la vittoria britannica a Porto Bello, in Panama, nel 1739.","Il mercato di antiquariato è celebre in tutto il mondo: il sabato è il giorno principale."],
+"Columbia Road Flower Market":["Strada vittoriana di case basse. Il mercato dei fiori è un’istituzione dell’East End.","Si tiene la domenica mattina, indicativamente dalle 8 alle 15. I venditori attirano i clienti gridando le offerte."],
+"Shoreditch":["Quartiere operaio e industriale dell’East End. Nel 1576 qui fu costruito The Theatre, dove recitò anche la compagnia di Shakespeare.","Oggi è la capitale londinese della street art: le opere cambiano di continuo."],
+"Redchurch Street":["Da via industriale a polo di boutique, caffè e concept store.","Qui vicino c’è il Boundary Estate, considerato uno dei primi progetti pubblici di case popolari."],
+"Sclater Street":["Strada di vecchi edifici industriali e murales. In passato la zona ospitava un mercato domenicale di animali.","Una buona via per capire come Shoreditch mescoli vecchio e nuovo."],
+"Brick Lane":["Il nome viene dalle fornaci di mattoni. Poi arrivarono ugonotti, ebrei dell’Europa orientale e, dagli anni Sessanta, i bengalesi.","La Grande Moschea fu chiesa ugonotta, sinagoga e poi moschea. Famosi i bagel di Beigel Bake."],
+"Old Spitalfields Market":["Mercato dal XVII secolo; la grande tettoia è vittoriana. Oggi ospita design, moda, artigianato e street food.","Spitalfields deriva da “St Mary Spital”, un ospedale medievale."],
+"Boundary Brasserie":["Il Boundary è in un ex magazzino vittoriano. L’hotel è stato creato da Terence Conran nel 2009.","Esempio perfetto di storia industriale rilanciata come design e ospitalità."],
+"Victoria Park":["Aperto nel 1845, fu il primo grande parco pensato per gli abitanti popolari dell’East End, per questo “People’s Park”.","Ha una fontana gotica vittoriana del 1862 (Burdett-Coutts). Nel 1978 vi si tenne il concerto Rock Against Racism."],
+"Broadway Market":["Via di Hackney con una lunga tradizione commerciale, oggi tra bancarelle, librerie e caffè indipendenti.","Controlla gli orari: il giorno principale del mercato è il sabato, la domenica può essere più ridotta."],
+"London Fields":["Antico pascolo comune per il bestiame diretto a Londra; parco pubblico dal 1872.","C’è il London Fields Lido, una piscina scoperta lunga 50 metri."],
+"Hackney City Farm":["Fattoria urbana nata negli anni Ottanta con scopi educativi e comunitari.","Ingresso libero a offerta. La domenica chiude indicativamente alle 16:30: arrivarci prima."],
+"Hackney Wick":["Ex zona di fabbriche e magazzini lungo il River Lea. Dopo le Olimpiadi del 2012 è diventata un polo creativo.","Ospita una delle più alte concentrazioni di studi d’artista d’Europa."],
+"Westminster Abbey":["Incoronazioni dei monarchi dal 1066. La chiesa attuale fu iniziata da Enrico III nel 1245.","Vi riposano Newton, Darwin e Dickens. Qui si sono sposati William e Kate nel 2011 e si è svolto il funerale di Elisabetta II."],
+"Big Ben":["“Big Ben” è la campana (circa 13 tonnellate). La torre si chiama Elizabeth Tower, completata nel 1859.","Il Palazzo di Westminster fu ricostruito dopo l’incendio del 1834 da Barry e Pugin."],
+"Whitehall e Downing Street":["Whitehall prende il nome dal palazzo Tudor distrutto da un incendio nel 1698. Al numero 10 di Downing Street abita il Primo Ministro.","Al centro della via c’è il Cenotafio di Lutyens, del 1920."],
+"Horse Guards Parade":["Piazza d’armi dietro Whitehall, sede del cambio della guardia a cavallo.","Qui si svolge il Trooping the Colour. Controlla gli orari ufficiali del cambio."],
+"St James’s Park":["Il più antico parco reale di Londra: Enrico VIII lo acquistò come terreno di caccia e Carlo II lo trasformò.","I pellicani vivono qui dal 1664, dono dell’ambasciatore russo."],
+"Buckingham Palace":["Era Buckingham House nel 1703. Giorgio III la acquistò nel 1761; Victoria ne fece la residenza reale nel 1837.","Ha 775 stanze. Davanti c’è il Victoria Memorial del 1911."],
+"Marylebone High Street":["Il nome deriva da “St Mary at the bourne”, la chiesa sul torrente Tyburn.","A pochi passi c’è Baker Street, con il museo di Sherlock Holmes."],
+"Chiltern Street":["Quartiere sviluppato su tenute aristocratiche tra Settecento e Ottocento.","Qui sorge il Chiltern Firehouse, ex caserma dei pompieri vittoriana diventata hotel nel 2014."],
+"Daunt Books":["Edificio edoardiano del 1912, costruito appositamente come libreria, con galleria in legno e luce dall’alto.","I libri di viaggio sono ordinati per paese, non per genere."],
+"Regent’s Park":["Progettato da John Nash per il Principe Reggente, aperto al pubblico dal 1835.","Ospita lo ZSL London Zoo (dal 1828) e giardini con migliaia di rose."]
+};
+I["Albert Memorial"]=I["Albert Memorial"];
+const E={
+ven:["Alla stazione di Earls Court c’è una Police Box blu stile TARDIS.","Brompton Cemetery: passeggiata tra tombe vittoriane (Emmeline Pankhurst).","Dopo cena, ripassa dalla Royal Albert Hall illuminata."],
+sam:["Monument, colonna alta 202 piedi per il Great Fire del 1666: 311 gradini.","Sky Garden: terrazza panoramica gratuita, serve prenotare.","Golden Hinde: replica del galeone di Francis Drake a Southwark.","Shakespeare’s Globe, lungo la South Bank vicino alla Tate Modern."],
+sap:["Serpentine Galleries: arte contemporanea a ingresso libero.","Peter Pan e Round Pond a Kensington Gardens.","Science Museum, accanto al Natural History Museum, ingresso libero.","Notting Hill: Lancaster Road, per le case colorate."],
+dom:["Beigel Bake: bagel e salt beef in Brick Lane.","Dennis Severs’ House: casa-museo vittoriana a lume di candela a Spitalfields.","Christ Church Spitalfields, chiesa di Hawksmoor.","Spitalfields City Farm, per una pausa insolita."],
+dop:["Regent’s Canal: sentiero lungo il canale verso Victoria Park.","Crate Brewery, a Hackney Wick: birra e pizza sull’acqua.","Queen Elizabeth Olympic Park a pochi minuti a piedi.","Hackney Marshes, per chi ha ancora gambe."],
+lun:["Churchill War Rooms: i bunker di guerra su Whitehall.","Banqueting House: soffitto dipinto da Rubens.","Trafalgar Square e National Gallery (ingresso gratuito).","Fortnum & Mason e Piccadilly, vicino a St James’s."],
+mar:["Sherlock Holmes Museum, 221B Baker Street, a pochi passi.","Wallace Collection a Manchester Square: ingresso gratuito.","Primrose Hill, a nord di Regent’s Park, con vista sullo skyline.","St Christopher’s Place, per un’ultima pausa."]
+};
+// PREFERENZA UTENTE: il tasto PDF crea il PDF e apre subito la finestra di condivisione, con un solo tocco, senza link né passaggi intermedi.
+const T=s=>s.replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[–—]/g,"-");
+function pdf(n){
+ const i=I[n],{jsPDF}=window.jspdf,doc=new jsPDF({unit:"mm",format:"a4"});
+ doc.setTextColor(0);doc.setFont("helvetica","bold");doc.setFontSize(24);
+ doc.text(doc.splitTextToSize(T(n),170),20,28);
+ doc.setDrawColor(185,78,46);doc.setLineWidth(.8);doc.line(20,38,190,38);
+ let y=50;
+ [["Storia",i[0]],["Curiosità",i[1]]].forEach(s=>{
+  doc.setFont("helvetica","bold");doc.setFontSize(15);doc.setTextColor(185,78,46);doc.text(s[0],20,y);y+=8;
+  doc.setFont("helvetica","normal");doc.setFontSize(13);doc.setTextColor(0);
+  const l=doc.splitTextToSize(T(s[1]),170);doc.text(l,20,y,{lineHeightFactor:1.5});y+=l.length*7.5+12;
+ });
+ doc.setFontSize(10);doc.setTextColor(90);doc.text("Londra - itinerario di viaggio",20,285);
+ const blob=doc.output("blob"),name=n.replace(/[^A-Za-z0-9]+/g,"-")+".pdf",f=new File([blob],name,{type:"application/pdf"});
+ if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:n}).catch(()=>{});return}
+ window.open(URL.createObjectURL(blob),"_blank");
+}
+document.addEventListener("click",e=>{const b=e.target.closest(".stop");if(b)pdf(b.dataset.n)});
+const nav=document.getElementById("nav"),box=document.getElementById("giorni");
+D.forEach(d=>{
+ nav.insertAdjacentHTML("beforeend",`<a href="#${d.id}">${d.t}</a>`);
+ box.insertAdjacentHTML("beforeend",`<section id="${d.id}"><h2>${d.t}</h2><p class="sub">${d.s}</p>
+ ${d.pren?`<div class="pren">${d.pren[0]} · <a href="${q(d.pren[1])}" target="_blank" rel="noopener">mappa</a></div>`:""}
+ <div class="btns"><a class="btn" href="${dir(d,"walking")}" target="_blank" rel="noopener">A piedi su Maps</a><a class="btn alt" href="${dir(d,"transit")}" target="_blank" rel="noopener">Mezzi pubblici</a></div>
+ <ol>${d.st.map(x=>`<li>${I[x[0]]?`<button class="stop" data-n="${x[0]}">${x[0]} · PDF</button>`:`<b>${x[0]}</b>`}<br>${x[1]}</li>`).join("")}</ol>
+ ${d.n.map(x=>`<p class="nota">• ${x}</p>`).join("")}
+ <div class="cons"><b>Itinerario migliore:</b> ${d.c}</div><div class="extra"><b>In zona, da non perdere</b><ul>${E[d.id].map(x=>`<li>${x}</li>`).join("")}</ul></div></section>`);
+});
+</script>
+</body>
+</html>
